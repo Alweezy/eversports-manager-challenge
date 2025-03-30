@@ -96,6 +96,12 @@ npm install
 npm run start
 ```
 
+### Running in development
+> This allows for auto reload on saving changes
+```sh
+npm run dev
+```
+
 ### Run test
 ```sh
 npm run test
