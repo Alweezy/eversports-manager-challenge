@@ -26,6 +26,8 @@ router.post("/", (req, res) => {
     if (req.body.billingPeriods > 12) {
       return res.status(400).json({ message: "billingPeriodsMoreThan12Months" });
     }
+
+    // this if statement appears buggy, should we update to req.body.billingPeriods?
     if (req.billingPeriods < 6) {
       return res.status(400).json({ message: "billingPeriodsLessThan6Months" });
     }

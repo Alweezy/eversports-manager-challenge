@@ -67,7 +67,37 @@ When refactoring, you should consider the following aspects:
 > For the scope of this task, the data used is mocked within the json files `membership.json` and `membership-periods.json`
 
 > [!NOTE]
-> We provided you with an clean express.js server to run the example. For your implementations, feel free to use any library out there to help you with your solution. If you decide to choose another JavaScript/TypeScript http library/framework (eg. NestJs) update the run config described below if needed, and ensure that the routes of the described actions don't change.
+> We provided you with a clean express.js server to run the example. For your implementations, feel free to use any library out there to help you with your solution. If you decide to choose another JavaScript/TypeScript http library/framework (eg. NestJs) update the run config described below if needed, and ensure that the routes of the described actions don't change.
+
+## Task 1 Assumptions and decisions:
+#### 1. Generation of UUIDS
+Even though this was just a exercise, I preferred `crypto.randomUUID()`  because it is more preferred to generate cryptographically stronger UUIDs.
+It is also built-in in  modern web browsers and therefore no need to additional installations,
+
+#### 2.Persistence of data
+Persistence in a database is out of scope for this challenge, but the approach adopted (use of repositories, and interfaces) makes it easy to adopt databases.
+The 2 available json files `memberships.json` and `membership-periods.json` are used in the `modern` endpoints just for seed but we are not writing additional content to them.
+
+#### 3. Modified types
+In an effort to reconcile the data inside the json files, I made some edits to the types 
+
+```ts
+interface Membership {
+id: number; // unique identifier
+uuid: string; // universally unique identifier
+name: string; // name of the membership
+userId: number; // the user that the membership is assigned to
+recurringPrice: number; // price the user has to pay for every period
+validFrom: Date; // start of the validity
+validUntil: Date; // end of the validity
+state: string; // indicates the state of the membership
+paymentMethod: string | null; // which payment method will be used to pay for the periods
+billingInterval: string; // the interval unit of the periods
+billingPeriods: number; // the number of periods the membership has
+assignedBy?: string; // who assigned the membership
+}
+```
+Additional assumptions and decisions are available through out the entire changes as co-located comments.
 
 
 ## Task 2 - Design an architecture to provide a membership export (conception only)
@@ -78,7 +108,35 @@ Your task is to **map out a diagram** that visualizes the asynchronous process f
 
 Because the team has other things to work on too, this task is timeboxed to **1 hour** and you should share the architecture diagram as a **PDF file**.
 
-> [!NOTE]
+## Task 2 solution
+Please refer to a pdf document contained in the root folder named `membership-csv-export.pdf`
+
+## Components & Software
+1. **Client:** The user who initiates the export request.
+2. **API Gateway (AWS Gateway):** This is the entry point for the export request.  It receives the request from the client and routes it to the appropriate service.
+3. **Message Queue (RabbitMQ):** I'm using a message broker to decouple the request handling from the actual CSV generation.  The API Gateway places export jobs in the queue.
+4. **Worker Service (EC2 Instance):** This service consumes the export jobs from the message queue.  It performs the following tasks:
+
+> * Retrieves the necessary data from the Postgres database.
+> * Generates the CSV file.
+> * Stores the CSV file in an AWS S3 Bucket.
+> * Uses SendGrid and an Email Service(EC2 Instance) to sends an email to the user with a link to download the CSV file.
+
+5. **Postgres Database:** Sotrage of membership data is out of scope for this task (see task 1), but this db would hold the data.
+6. **AWS S3 Bucket:** Object storage where the generated CSV files are stored.
+7. **Email Service (EC2 Instance) & SendGrid:** Handles the sending of email notifications to the user, providing the download link.  SendGrid is used to facilitate email sending.
+
+#### Workflow
+
+> * The user initiates an export request through the client.
+> * The request is received by the API Gateway (AWS Gateway).
+> * The API Gateway routes the request to the RabbitMQ message queue.
+> * The Worker Service retrieves the export job from the RabbitMQ queue.
+> * The Worker Service queries the Postgres database to retrieve the data.
+> * The Worker Service generates the CSV file and stores it in the AWS S3 Bucket.
+> * The Worker Service uses the Email Service (EC2 Instance) & SendGrid to send an email to the user with a download link.
+> * The user retrieves the exported CSV file from the AWS S3 Bucket using the provided link.
+* > [!NOTE]
 > Feel free to use any tool out there to create your diagram. If you are not familiar with such a tool, you can use www.draw.io. 
 
 ## Repository Intro
@@ -94,6 +152,12 @@ npm install
 
 ```sh
 npm run start
+```
+
+### Running in development
+> This allows for auto reload on saving changes
+```sh
+npm run dev
 ```
 
 ### Run test
@@ -118,3 +182,7 @@ We believe that great developers are not bound to a specific technology set, but
 - Jest - https://jestjs.io/
 
 Best of luck and looking forward to what you are able to accomplish! 🙂
+
+#### Time spent:
+I enjoyed working on this challenge, there as still areas of improvement.
+I spent `~10 hours` in the refactors.
