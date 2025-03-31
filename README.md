@@ -78,7 +78,35 @@ Your task is to **map out a diagram** that visualizes the asynchronous process f
 
 Because the team has other things to work on too, this task is timeboxed to **1 hour** and you should share the architecture diagram as a **PDF file**.
 
-> [!NOTE]
+## Task 2 solution
+Please refer to a pdf document contained in the root folder named `membership-csv-export.pdf`
+
+## Components & Software
+1. **Client:** The user who initiates the export request.
+2. **API Gateway (AWS Gateway):** This is the entry point for the export request.  It receives the request from the client and routes it to the appropriate service.
+3. **Message Queue (RabbitMQ):** I'm using a message broker to decouple the request handling from the actual CSV generation.  The API Gateway places export jobs in the queue.
+4. **Worker Service (EC2 Instance):** This service consumes the export jobs from the message queue.  It performs the following tasks:
+
+> * Retrieves the necessary data from the Postgres database.
+> * Generates the CSV file.
+> * Stores the CSV file in an AWS S3 Bucket.
+> * Uses SendGrid and an Email Service(EC2 Instance) to sends an email to the user with a link to download the CSV file.
+
+5. **Postgres Database:** Sotrage of membership data is out of scope for this task (see task 1), but this db would hold the data.
+6. **AWS S3 Bucket:** Object storage where the generated CSV files are stored.
+7. **Email Service (EC2 Instance) & SendGrid:** Handles the sending of email notifications to the user, providing the download link.  SendGrid is used to facilitate email sending.
+
+#### Workflow
+
+> * The user initiates an export request through the client.
+> * The request is received by the API Gateway (AWS Gateway).
+> * The API Gateway routes the request to the RabbitMQ message queue.
+> * The Worker Service retrieves the export job from the RabbitMQ queue.
+> * The Worker Service queries the Postgres database to retrieve the data.
+> * The Worker Service generates the CSV file and stores it in the AWS S3 Bucket.
+> * The Worker Service uses the Email Service (EC2 Instance) & SendGrid to send an email to the user with a download link.
+> * The user retrieves the exported CSV file from the AWS S3 Bucket using the provided link.
+* > [!NOTE]
 > Feel free to use any tool out there to create your diagram. If you are not familiar with such a tool, you can use www.draw.io. 
 
 ## Repository Intro
