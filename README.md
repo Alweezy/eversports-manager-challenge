@@ -182,3 +182,7 @@ We believe that great developers are not bound to a specific technology set, but
 - Jest - https://jestjs.io/
 
 Best of luck and looking forward to what you are able to accomplish! 🙂
+
+#### Time spent:
+I enjoyed working on this challenge, there as still areas of improvement.
+I spent `~10 hours` in the refactors.
