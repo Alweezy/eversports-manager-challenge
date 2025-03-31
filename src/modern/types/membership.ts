@@ -10,6 +10,7 @@ export interface Membership {
   paymentMethod: string | null;
   billingInterval: string;
   billingPeriods: number;
+  assignedBy?: string;
 }
 
 export interface CreateMembershipResponse extends Membership {

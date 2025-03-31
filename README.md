@@ -67,7 +67,37 @@ When refactoring, you should consider the following aspects:
 > For the scope of this task, the data used is mocked within the json files `membership.json` and `membership-periods.json`
 
 > [!NOTE]
-> We provided you with an clean express.js server to run the example. For your implementations, feel free to use any library out there to help you with your solution. If you decide to choose another JavaScript/TypeScript http library/framework (eg. NestJs) update the run config described below if needed, and ensure that the routes of the described actions don't change.
+> We provided you with a clean express.js server to run the example. For your implementations, feel free to use any library out there to help you with your solution. If you decide to choose another JavaScript/TypeScript http library/framework (eg. NestJs) update the run config described below if needed, and ensure that the routes of the described actions don't change.
+
+## Task 1 Assumptions and decisions:
+#### 1. Generation of UUIDS
+Even though this was just a exercise, I preferred `crypto.randomUUID()`  because it is more preferred to generate cryptographically stronger UUIDs.
+It is also built-in in  modern web browsers and therefore no need to additional installations,
+
+#### 2.Persistence of data
+Persistence in a database is out of scope for this challenge, but the approach adopted (use of repositories, and interfaces) makes it easy to adopt databases.
+The 2 available json files `memberships.json` and `membership-periods.json` are used in the `modern` endpoints just for seed but we are not writing additional content to them.
+
+#### 3. Modified types
+In an effort to reconcile the data inside the json files, I made some edits to the types 
+
+```ts
+interface Membership {
+id: number; // unique identifier
+uuid: string; // universally unique identifier
+name: string; // name of the membership
+userId: number; // the user that the membership is assigned to
+recurringPrice: number; // price the user has to pay for every period
+validFrom: Date; // start of the validity
+validUntil: Date; // end of the validity
+state: string; // indicates the state of the membership
+paymentMethod: string | null; // which payment method will be used to pay for the periods
+billingInterval: string; // the interval unit of the periods
+billingPeriods: number; // the number of periods the membership has
+assignedBy?: string; // who assigned the membership
+}
+```
+Additional assumptions and decisions are available through out the entire changes as co-located comments.
 
 
 ## Task 2 - Design an architecture to provide a membership export (conception only)
@@ -152,3 +182,7 @@ We believe that great developers are not bound to a specific technology set, but
 - Jest - https://jestjs.io/
 
 Best of luck and looking forward to what you are able to accomplish! 🙂
+
+#### Time spent:
+I enjoyed working on this challenge, there as still areas of improvement.
+I spent `~10 hours` in the refactors.
